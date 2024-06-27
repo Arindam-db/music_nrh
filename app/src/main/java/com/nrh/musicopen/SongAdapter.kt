@@ -6,7 +6,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class SongAdapter(private val songs: List<Song>) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
+class SongAdapter(private val songs: List<Song>, private val listener: OnItemClickListener) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
+
+    interface OnItemClickListener {
+        fun onItemClick(song: Song)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_song, parent, false)
@@ -16,6 +20,9 @@ class SongAdapter(private val songs: List<Song>) : RecyclerView.Adapter<SongAdap
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
         val song = songs[position]
         holder.bind(song)
+        holder.itemView.setOnClickListener {
+            listener.onItemClick(song)
+        }
     }
 
     override fun getItemCount(): Int {
