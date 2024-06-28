@@ -9,7 +9,7 @@ import kotlinx.coroutines.*
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
 
-    private val splashTimeOut: Long = 1500 // 1.5 sec
+    private val splashTimeOut: Long = 500 // 0.5 sec
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -35,5 +35,12 @@
             android:name=".MainActivity"
             android:exported="true">
         </activity>
+
+        <!-- NowPlaying activity declaration -->
+        <activity
+            android:name=".NowPlayingActivity"
+            android:exported="true">
+        </activity>
+
     </application>
 </manifest>
