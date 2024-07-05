@@ -3,13 +3,14 @@ package com.nrh.musicopen
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.Window
 import android.widget.Button
+import android.widget.SearchView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -21,28 +22,39 @@ class MainActivity : AppCompatActivity(), SongAdapter.OnItemClickListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var songAdapter: SongAdapter
     private val songList = mutableListOf<Song>()
-    private var mediaPlayer: MediaPlayer? = null
     private lateinit var playPauseButton: Button
     private lateinit var nextButton: Button
     private lateinit var previousButton: Button
     private var currentSongIndex: Int = 0
+    private lateinit var searchView: SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
         recyclerView = findViewById(R.id.recycler_view)
         playPauseButton = findViewById(R.id.btn_play_pause)
         nextButton = findViewById(R.id.btn_next)
         previousButton = findViewById(R.id.btn_previous)
+        searchView = findViewById(R.id.search_view)
 
         songAdapter = SongAdapter(songList, this)
         recyclerView.adapter = songAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        playPauseButton.setOnClickListener { togglePlayPause() }
-        nextButton.setOnClickListener { playNextSong() }
-        previousButton.setOnClickListener { playPreviousSong() }
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let { songAdapter.filter(it) }
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                newText?.let { songAdapter.filter(it) }
+                return false
+            }
+        })
 
         checkAndRequestPermissions()
     }
@@ -107,49 +119,9 @@ class MainActivity : AppCompatActivity(), SongAdapter.OnItemClickListener {
     }
 
     private fun playSong(song: Song) {
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(song.path)
-            prepare()
-            start()
-        }
-        playPauseButton.text = "Pause"
-        Toast.makeText(this, "Playing: ${song.title}", Toast.LENGTH_SHORT).show()
-
         val intent = Intent(this, NowPlayingActivity::class.java).apply {
             putExtra("song", song)
         }
         startActivity(intent)
-    }
-
-    private fun togglePlayPause() {
-        mediaPlayer?.let {
-            if (it.isPlaying) {
-                it.pause()
-                playPauseButton.text = "Play"
-            } else {
-                it.start()
-                playPauseButton.text = "Pause"
-            }
-        }
-    }
-
-    private fun playNextSong() {
-        if (songList.isNotEmpty()) {
-            currentSongIndex = (currentSongIndex + 1) % songList.size
-            playSong(songList[currentSongIndex])
-        }
-    }
-
-    private fun playPreviousSong() {
-        if (songList.isNotEmpty()) {
-            currentSongIndex = if (currentSongIndex - 1 < 0) songList.size - 1 else currentSongIndex - 1
-            playSong(songList[currentSongIndex])
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mediaPlayer?.release()
     }
 }

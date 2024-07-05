@@ -33,13 +33,15 @@
         <!-- Main activity of the app -->
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar">
         </activity>
 
         <!-- NowPlaying activity declaration -->
         <activity
             android:name=".NowPlayingActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
 
     </application>

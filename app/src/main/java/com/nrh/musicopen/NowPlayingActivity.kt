@@ -1,10 +1,14 @@
 package com.nrh.musicopen
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 
 class NowPlayingActivity : AppCompatActivity() {
@@ -18,6 +22,7 @@ class NowPlayingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_now_playing)
 
         tvSongTitle = findViewById(R.id.tv_song_title)
@@ -30,8 +35,22 @@ class NowPlayingActivity : AppCompatActivity() {
         song?.let {
             tvSongTitle.text = it.title
             tvSongArtist.text = it.artist
-            // Set album art if available
 
+            // Set album art if available
+            val albumArt = getAlbumArt(it.path)
+            if (albumArt != null) {
+                ivAlbumArt.setImageBitmap(albumArt)
+            } else {
+                ivAlbumArt.setImageResource(R.drawable.default_album_art) // Use a default image if no album art is available
+            }
+
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(it.path)
+                prepare()
+                start()
+            }
+
+            btnPlayPause.text = if (mediaPlayer?.isPlaying == true) "Pause" else "Play"
             btnPlayPause.setOnClickListener {
                 togglePlayPause()
             }
@@ -47,6 +66,24 @@ class NowPlayingActivity : AppCompatActivity() {
                 it.start()
                 btnPlayPause.text = "Pause"
             }
+        }
+    }
+
+    private fun getAlbumArt(filePath: String): Bitmap? {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(filePath)
+            val art = retriever.embeddedPicture
+            if (art != null) {
+                BitmapFactory.decodeByteArray(art, 0, art.size)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        } finally {
+            retriever.release()
         }
     }
 

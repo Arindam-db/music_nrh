@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class SongAdapter(private val songs: List<Song>, private val listener: OnItemClickListener) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
 
+    private var filteredSongs: List<Song> = songs
+
     interface OnItemClickListener {
         fun onItemClick(song: Song)
     }
@@ -18,7 +20,7 @@ class SongAdapter(private val songs: List<Song>, private val listener: OnItemCli
     }
 
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
-        val song = songs[position]
+        val song = filteredSongs[position]
         holder.bind(song)
         holder.itemView.setOnClickListener {
             listener.onItemClick(song)
@@ -26,7 +28,19 @@ class SongAdapter(private val songs: List<Song>, private val listener: OnItemCli
     }
 
     override fun getItemCount(): Int {
-        return songs.size
+        return filteredSongs.size
+    }
+
+    fun filter(query: String) {
+        filteredSongs = if (query.isEmpty()) {
+            songs
+        } else {
+            songs.filter {
+                it.title.contains(query, ignoreCase = true) ||
+                        it.artist.contains(query, ignoreCase = true)
+            }
+        }
+        notifyDataSetChanged()
     }
 
     class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
